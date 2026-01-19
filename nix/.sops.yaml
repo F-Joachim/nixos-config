@@ -1,0 +1,7 @@
+keys:
+  - &nixos age1darml86jmgq58ye3eetrzlv8yhz07f3c0up9an4mx2ars3cgld6q3a3nyq
+creation_rules:
+  - path_regex: .*secret.*
+    key_groups:
+    - age:
+      - *nixos

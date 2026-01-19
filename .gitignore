@@ -1,0 +1,10 @@
+.idea
+plugins
+tasks
+workspace
+jdbc-drivers
+extensions
+app-internal-state.db
+updatedBrokenPlugins.db
+early-access-registry.txt
+.lock

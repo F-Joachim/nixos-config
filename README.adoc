@@ -1,0 +1,173 @@
+= Yet another NixOS development environment
+:toc:
+:toclevels: 5
+:imagesdir: docs/images
+:example-number: 0
+:table-number: 0
+:listing-number: 0
+:figure-number: 0
+:icons: font
+
+image::nixos.svg.png[]
+
+This repository provides a flake-based NixOS configuration with https://github.com/Mic92/sops-nix[sops] encrypted secrets.
+
+'''
+
+*Maintainer:* Joachim Friedrich - <49515773+F-Joachim@users.noreply.github.com>
+
+*Authors:*
+
+- Joachim Friedrich - <49515773+F-Joachim@users.noreply.github.com>
+
+'''
+
+== How to apply the configuration
+
+=== Prerequisites
+
+* This guide assumes that you've already installed NixOS (e.g. in a VM):
+** Created a user with autologin enabled
+
+=== Step-by-step instructions
+
+* Boot into NixOS
+* Preparing environment to use sops-encrypted secrets:
+** Create an ssh key pair (file name: *private*, passphrase: leave empty!):
++
+[source,bash]
+----
+ssh-keygen -t ed25519
+----
+** Generate new key at ~/.config/sops/age/keys.txt
++
+[source,bash]
+----
+nix shell nixpkgs#age -c age-keygen -o ~/.config/sops/age/keys.txt
+----
+** Generate new key at ~/.config/sops/age/keys.txt from private ssh key at ~/.ssh/private
++
+[source,bash]
+----
+nix run nixpkgs#ssh-to-age -- -private-key -i ~/.ssh/private > ~/.config/sops/age/keys.txt
+----
+** Get a public key of ~/.config/sops/age/keys.txt
++
+[source,bash]
+----
+nix shell nixpkgs#age -c age-keygen -y ~/.config/sops/age/keys.txt
+----
+
+** From now on, you're able to create new encrypted files with your ssh public key:
++
+Example 1: Creating a yaml file containing a secret
++
+[source,bash]
+----
+nix-shell -p sops --run "sops gh_token.secret.yaml"
+----
++
+Example 2: Encrypt a whole file (useful for config files)
++
+[source,bash]
+----
+nix-shell -p sops --run "sops -e preexisting.file > encrypted.file"
+----
+
+* Apply configuration:
+** Update flake
++
+[source,bash]
+----
+nix flake update
+----
+** Update NixOS
++
+[source,bash]
+----
+sudo nixos-rebuild switch --flake /home/<user>/dotfiles/ --upgrade
+----
++
+TIP: If you encounter an error message that you have exceeded the GitHub API rate limit, you can pass your GitHub token to NixOS as follows:
++
+[source,bash]
+----
+export NIX_CONFIG="access-tokens = github.com=<read-repo-token-goes-here>"
+----
+
+=== List and delete old generations
+
+* List generations:
++
+[source,bash]
+----
+# list system profile generations
+sudo nix-env -p /nix/var/nix/profiles/system --list-generations
+
+# list home-manager profile generations
+nix-env -p ~/.local/state/nix/profiles/home-manager --list-generations
+----
+
+* Delete old generations (and keep 5):
++
+[source,bash]
+----
+# delete generations from system's profile
+sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations +5
+
+# have to delete home-manager profiles separately
+nix-env --profile ~/.local/state/nix/profiles/home-manager --delete-generations +5
+
+# and finally collect the garbage
+sudo nix-collect-garbage
+----
+
+=== FAQ
+
+==== How to list size of generations
+
+[source,bash]
+----
+#!/usr/bin/env bash
+
+# List all generations
+generations=$(sudo nix-env -p /nix/var/nix/profiles/system --list-generations | awk '{print $1}')
+
+printf "system profiles:\n"
+
+# Iterate over each generation
+for gen in $generations; do
+  printf "  Generation %s: " "$gen"
+
+  # Get the profile path for the generation
+  profile_path="/nix/var/nix/profiles/system-${gen}-link"
+
+  # Find all store paths referenced by the generation
+  store_paths=$(nix-store --query --requisites $profile_path)
+
+  # Calculate the total disk usage of the store paths
+  size=$(du -shc $store_paths | grep total)
+  printf "%s \n" "$size"
+done
+
+
+printf "\nhome-manager profiles:\n"
+
+# List all generations
+home_manager_generations=$(sudo nix-env -p /home/<user>/.local/state/nix/profiles/home-manager --list-generations | awk '{print $1}')
+
+# Iterate over each generation
+for gen in $home_manager_generations; do
+  printf "  Generation %s: " "$gen"
+
+  # Get the profile path for the generation
+  profile_path="/home/<user>/.local/state/nix/profiles/home-manager-${gen}-link"
+
+  # Find all store paths referenced by the generation
+  store_paths=$(nix-store --query --requisites $profile_path)
+
+  # Calculate the total disk usage of the store paths
+  size=$(du -shc $store_paths | grep total)
+  printf "%s \n" "$size"
+done
+----
