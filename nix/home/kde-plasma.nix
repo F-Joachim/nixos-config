@@ -40,6 +40,7 @@
                 "applications:org.kde.kate.desktop"
                 "applications:code.desktop"
                 "applications:firefox.desktop"
+                applications:org.gnome.Evolution.desktop
               ];
               behavior = {
                 grouping.method = "none";
