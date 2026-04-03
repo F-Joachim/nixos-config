@@ -20,6 +20,7 @@
       firefox
       google-chrome
       nnn # terminal file manager
+      evolution # email client
 
       # archives
       zip
