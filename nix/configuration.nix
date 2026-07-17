@@ -17,6 +17,11 @@
       inputs.sops-nix.nixosModules.sops
     ];
 
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = false;
+  };
+
   # Bootloader.
   boot.loader = {
     efi.canTouchEfiVariables = true;
@@ -27,6 +32,9 @@
       useOSProber = true;
     };
   };
+
+  boot.initrd.availableKernelModules = ["usbhid" "xhci_hcd" "usb_storage"];
+  services.hardware.bolt.enable = true;
 
 
   # Set your time zone.
@@ -67,6 +75,14 @@
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
+  
+  # Enable Yubikey
+  services.udev.packages = [ pkgs.yubikey-personalization ];
+
+  programs.gnupg.agent = {
+    enable = true;
+    enableSSHSupport = true;
+  };
 
   # Enable sound with pipewire.
   services.pulseaudio.enable = false;
@@ -121,6 +137,8 @@
     wget
     vim
     xdg-utils
+    yubikey-personalization
+    yubikey-touch-detector
   ];
 
   # This value determines the NixOS release from which the default
