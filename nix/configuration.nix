@@ -108,6 +108,7 @@
     isNormalUser = true;
     description = config.nixconfig.userdata.description;
     extraGroups = [ "networkmanager" "wheel" "docker" ];
+    shell = pkgs.zsh;
   };
 
   nix.settings.trusted-users = [ "root" config.nixconfig.userdata.username ];
@@ -154,4 +155,7 @@
 
   # Enable flakes
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
+  # Enable zsh system-wide
+  programs.zsh.enable = true;
 }

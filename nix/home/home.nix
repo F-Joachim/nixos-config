@@ -4,11 +4,13 @@
   imports =
     [
       ../nixconfig.nix
-      ./git.nix
-      ./docker.nix
       ./bash.nix
-      ./vscode.nix
+      ./docker.nix
+      ./git.nix
+      ./idea.nix
       ./kde-plasma.nix
+      ./vscode.nix
+      ./zsh.nix
     ];
 
   home = {
