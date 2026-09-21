@@ -66,16 +66,16 @@
 
   # Configure keymap in X11
   services.xserver.xkb = {
-    layout = "de";
-    variant = "";
+    layout = "us";
+    variant = "intl";
   };
 
   # Configure console keymap
-  console.keyMap = "de";
+  console.useXkbConfig = true;
 
   # Enable CUPS to print documents.
   services.printing.enable = true;
-  
+
   # Enable Yubikey
   services.udev.packages = [ pkgs.yubikey-personalization ];
 
