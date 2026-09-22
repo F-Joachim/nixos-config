@@ -38,6 +38,7 @@
                 "applications:org.kde.dolphin.desktop"
                 "applications:org.kde.konsole.desktop"
                 "applications:org.kde.kate.desktop"
+                "applications:idea.desktop"
                 "applications:code.desktop"
                 "applications:firefox.desktop"
                 applications:org.gnome.Evolution.desktop
